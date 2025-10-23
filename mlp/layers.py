@@ -705,10 +705,9 @@ class DropoutLayer(StochasticLayer):
         """
         super(DropoutLayer, self).__init__(rng)
         assert incl_prob > 0.0 and incl_prob <= 1.0
-        self.rng = rng if rng is not None else np.random.RandomState()
         self.incl_prob = incl_prob
         self.share_across_batch = share_across_batch
-        # self.rng = rng
+        self.rng = rng
 
     def fprop(self, inputs, stochastic=True):
         """Forward propagates activations through the layer transformation.
