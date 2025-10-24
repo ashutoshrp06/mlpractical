@@ -15,8 +15,16 @@ from mlp import DEFAULT_SEED
 class DataProvider(object):
     """Generic data provider."""
 
-    def __init__(self, inputs, targets, batch_size, max_num_batches=-1,
-                 shuffle_order=True, rng=None, smooth_labels=False):
+    def __init__(
+        self,
+        inputs,
+        targets,
+        batch_size,
+        max_num_batches=-1,
+        shuffle_order=True,
+        rng=None,
+        smooth_labels=False,
+    ):
         """Create a new data provider object.
 
         Args:
@@ -37,14 +45,14 @@ class DataProvider(object):
         self.inputs = inputs
         self.targets = targets
         if batch_size < 1:
-            raise ValueError('batch_size must be >= 1')
+            raise ValueError("batch_size must be >= 1")
         self._batch_size = batch_size
         if max_num_batches == 0 or max_num_batches < -1:
-            raise ValueError('max_num_batches must be -1 or > 0')
+            raise ValueError("max_num_batches must be -1 or > 0")
         self._max_num_batches = max_num_batches
         self._update_num_batches()
         self.shuffle_order = shuffle_order
-        
+
         self._current_order = np.arange(inputs.shape[0])
         if rng is None:
             rng = np.random.RandomState(DEFAULT_SEED)
@@ -60,7 +68,7 @@ class DataProvider(object):
     @batch_size.setter
     def batch_size(self, value):
         if value < 1:
-            raise ValueError('batch_size must be >= 1')
+            raise ValueError("batch_size must be >= 1")
         self._batch_size = value
         self._update_num_batches()
 
@@ -72,7 +80,7 @@ class DataProvider(object):
     @max_num_batches.setter
     def max_num_batches(self, value):
         if value == 0 or value < -1:
-            raise ValueError('max_num_batches must be -1 or > 0')
+            raise ValueError("max_num_batches must be -1 or > 0")
         self._max_num_batches = value
         self._update_num_batches()
 
@@ -129,18 +137,27 @@ class DataProvider(object):
             self.new_epoch()
             raise StopIteration()
         # create an index slice corresponding to current batch number
-        batch_slice = slice(self._curr_batch * self.batch_size,
-                            (self._curr_batch + 1) * self.batch_size)
+        batch_slice = slice(
+            self._curr_batch * self.batch_size, (self._curr_batch + 1) * self.batch_size
+        )
         inputs_batch = self.inputs[batch_slice]
         targets_batch = self.targets[batch_slice]
         self._curr_batch += 1
         return inputs_batch, targets_batch
 
+
 class MNISTDataProvider(DataProvider):
     """Data provider for MNIST handwritten digit images."""
 
-    def __init__(self, which_set='train', batch_size=100, max_num_batches=-1,
-                 shuffle_order=True, rng=None, smooth_labels=False):
+    def __init__(
+        self,
+        which_set="train",
+        batch_size=100,
+        max_num_batches=-1,
+        shuffle_order=True,
+        rng=None,
+        smooth_labels=False,
+    ):
         """Create a new MNIST data provider object.
 
         Args:
@@ -157,9 +174,10 @@ class MNISTDataProvider(DataProvider):
             smooth_labels (bool): enable/disable label smoothing
         """
         # check a valid which_set was provided
-        assert which_set in ['train', 'valid', 'test'], (
-            'Expected which_set to be either train, valid or eval. '
-            'Got {0}'.format(which_set)
+        assert which_set in ["train", "valid", "test"], (
+            "Expected which_set to be either train, valid or eval. Got {0}".format(
+                which_set
+            )
         )
         self.which_set = which_set
         self.num_classes = 10
@@ -167,17 +185,25 @@ class MNISTDataProvider(DataProvider):
         # separator for the current platform / OS is used
         # MLP_DATA_DIR environment variable should point to the data directory
         data_path = os.path.join(
-            os.environ['MLP_DATA_DIR'], 'mnist-{0}.npz'.format(which_set))
+            os.environ["MLP_DATA_DIR"], "mnist-{0}.npz".format(which_set)
+        )
         assert os.path.isfile(data_path), (
-            'Data file does not exist at expected path: ' + data_path
+            "Data file does not exist at expected path: " + data_path
         )
         # load data from compressed numpy file
         loaded = np.load(data_path)
-        inputs, targets = loaded['inputs'], loaded['targets']
+        inputs, targets = loaded["inputs"], loaded["targets"]
         inputs = inputs.astype(np.float32)
         # pass the loaded data to the parent class __init__
         super(MNISTDataProvider, self).__init__(
-            inputs, targets, batch_size, max_num_batches, shuffle_order, rng, smooth_labels)
+            inputs,
+            targets,
+            batch_size,
+            max_num_batches,
+            shuffle_order,
+            rng,
+            smooth_labels,
+        )
 
     def next(self):
         """Returns next data batch or raises `StopIteration` if at end."""
@@ -203,11 +229,19 @@ class MNISTDataProvider(DataProvider):
         one_of_k_targets[range(int_targets.shape[0]), int_targets] = 1
         return one_of_k_targets
 
+
 class EMNISTDataProvider(DataProvider):
     """Data provider for EMNIST handwritten digit images."""
 
-    def __init__(self, which_set='train', batch_size=100, max_num_batches=-1,
-                 shuffle_order=True, rng=None, smooth_labels=False):
+    def __init__(
+        self,
+        which_set="train",
+        batch_size=100,
+        max_num_batches=-1,
+        shuffle_order=True,
+        rng=None,
+        smooth_labels=False,
+    ):
         """Create a new EMNIST data provider object.
 
         Args:
@@ -224,9 +258,10 @@ class EMNISTDataProvider(DataProvider):
             smooth_labels (bool): enable/disable label smoothing
         """
         # check a valid which_set was provided
-        assert which_set in ['train', 'valid', 'test'], (
-            'Expected which_set to be either train, valid or eval. '
-            'Got {0}'.format(which_set)
+        assert which_set in ["train", "valid", "test"], (
+            "Expected which_set to be either train, valid or eval. Got {0}".format(
+                which_set
+            )
         )
         self.which_set = which_set
         self.num_classes = 47
@@ -234,20 +269,28 @@ class EMNISTDataProvider(DataProvider):
         # separator for the current platform / OS is used
         # MLP_DATA_DIR environment variable should point to the data directory
         data_path = os.path.join(
-            os.environ['MLP_DATA_DIR'], 'emnist-{0}.npz'.format(which_set))
+            os.environ["MLP_DATA_DIR"], "emnist-{0}.npz".format(which_set)
+        )
         assert os.path.isfile(data_path), (
-            'Data file does not exist at expected path: ' + data_path
+            "Data file does not exist at expected path: " + data_path
         )
         # load data from compressed numpy file
         loaded = np.load(data_path)
         print(loaded.keys())
-        inputs, targets = loaded['inputs'], loaded['targets']
+        inputs, targets = loaded["inputs"], loaded["targets"]
         inputs = inputs.astype(np.float32)
-        inputs = np.reshape(inputs, newshape=(-1, 28*28))
+        inputs = np.reshape(inputs, newshape=(-1, 28 * 28))
         inputs = inputs / 255.0
         # pass the loaded data to the parent class __init__
         super(EMNISTDataProvider, self).__init__(
-            inputs, targets, batch_size, max_num_batches, shuffle_order, rng, smooth_labels)
+            inputs,
+            targets,
+            batch_size,
+            max_num_batches,
+            shuffle_order,
+            rng,
+            smooth_labels,
+        )
 
     def next(self):
         """Returns next data batch or raises `StopIteration` if at end."""
@@ -258,8 +301,6 @@ class EMNISTDataProvider(DataProvider):
         else:
             targets_batch_mat = self.to_one_of_k(targets_batch)
         return inputs_batch, targets_batch_mat
-        
-
 
     def to_one_of_k(self, int_targets):
         """Converts integer coded class target to 1 of K coded targets.
@@ -279,7 +320,7 @@ class EMNISTDataProvider(DataProvider):
         one_of_k_targets = np.zeros((int_targets.shape[0], self.num_classes))
         one_of_k_targets[range(int_targets.shape[0]), int_targets] = 1
         return one_of_k_targets
-    
+
     def label_smoothing(self, int_targets, alpha=0.1):
         """Converts integer coded class target to 1 of K coded targets with label smoothing.
 
@@ -295,16 +336,31 @@ class EMNISTDataProvider(DataProvider):
         (num_data, num_classes)
 
         """
-        
-        raise NotImplementedError
-  
-    
+
+        num_classes = self.num_classes
+        batch_size = int_targets.shape[0]
+        smoothed_targets = np.ones((batch_size, num_classes)) * (
+            alpha / (num_classes - 1)
+        )
+
+        for i in range(batch_size):
+            true_class = int_targets[i]
+            smoothed_targets[i, true_class] = 1.0 - alpha
+
+        return smoothed_targets
+
 
 class MetOfficeDataProvider(DataProvider):
     """South Scotland Met Office weather data provider."""
 
-    def __init__(self, window_size, batch_size=10, max_num_batches=-1,
-                 shuffle_order=True, rng=None):
+    def __init__(
+        self,
+        window_size,
+        batch_size=10,
+        max_num_batches=-1,
+        shuffle_order=True,
+        rng=None,
+    ):
         """Create a new Met Office data provider object.
 
         Args:
@@ -321,13 +377,12 @@ class MetOfficeDataProvider(DataProvider):
                 the data before each epoch.
             rng (RandomState): A seeded random number generator.
         """
-        data_path = os.path.join(
-            os.environ['MLP_DATA_DIR'], 'HadSSP_daily_qc.txt')
+        data_path = os.path.join(os.environ["MLP_DATA_DIR"], "HadSSP_daily_qc.txt")
         assert os.path.isfile(data_path), (
-            'Data file does not exist at expected path: ' + data_path
+            "Data file does not exist at expected path: " + data_path
         )
         raw = np.loadtxt(data_path, skiprows=3, usecols=range(2, 32))
-        assert window_size > 1, 'window_size must be at least 2.'
+        assert window_size > 1, "window_size must be at least 2."
         self.window_size = window_size
         # filter out all missing datapoints and flatten to a vector
         filtered = raw[raw >= 0].flatten()
@@ -339,18 +394,27 @@ class MetOfficeDataProvider(DataProvider):
         shape = (normalised.shape[-1] - self.window_size + 1, self.window_size)
         strides = normalised.strides + (normalised.strides[-1],)
         windowed = np.lib.stride_tricks.as_strided(
-            normalised, shape=shape, strides=strides)
+            normalised, shape=shape, strides=strides
+        )
         # inputs are first (window_size - 1) entries in windows
         inputs = windowed[:, :-1]
         # targets are last entry in windows
         targets = windowed[:, -1]
         super(MetOfficeDataProvider, self).__init__(
-            inputs, targets, batch_size, max_num_batches, shuffle_order, rng)
+            inputs, targets, batch_size, max_num_batches, shuffle_order, rng
+        )
+
 
 class CCPPDataProvider(DataProvider):
-
-    def __init__(self, which_set='train', input_dims=None, batch_size=10,
-                 max_num_batches=-1, shuffle_order=True, rng=None):
+    def __init__(
+        self,
+        which_set="train",
+        input_dims=None,
+        batch_size=10,
+        max_num_batches=-1,
+        shuffle_order=True,
+        rng=None,
+    ):
         """Create a new Combined Cycle Power Plant data provider object.
 
         Args:
@@ -369,36 +433,42 @@ class CCPPDataProvider(DataProvider):
                 the data before each epoch.
             rng (RandomState): A seeded random number generator.
         """
-        data_path = os.path.join(
-            os.environ['MLP_DATA_DIR'], 'ccpp_data.npz')
+        data_path = os.path.join(os.environ["MLP_DATA_DIR"], "ccpp_data.npz")
         assert os.path.isfile(data_path), (
-            'Data file does not exist at expected path: ' + data_path
+            "Data file does not exist at expected path: " + data_path
         )
         # check a valid which_set was provided
-        assert which_set in ['train', 'valid'], (
-            'Expected which_set to be either train or valid '
-            'Got {0}'.format(which_set)
+        assert which_set in ["train", "valid"], (
+            "Expected which_set to be either train or valid Got {0}".format(which_set)
         )
         # check input_dims are valid
         if not input_dims is not None:
             input_dims = set(input_dims)
             assert input_dims.issubset({0, 1, 2, 3}), (
-                'input_dims should be a subset of {0, 1, 2, 3}'
+                "input_dims should be a subset of {0, 1, 2, 3}"
             )
         loaded = np.load(data_path)
-        inputs = loaded[which_set + '_inputs']
+        inputs = loaded[which_set + "_inputs"]
         if input_dims is not None:
             inputs = inputs[:, input_dims]
-        targets = loaded[which_set + '_targets']
+        targets = loaded[which_set + "_targets"]
         super(CCPPDataProvider, self).__init__(
-            inputs, targets, batch_size, max_num_batches, shuffle_order, rng)
+            inputs, targets, batch_size, max_num_batches, shuffle_order, rng
+        )
 
 
 class AugmentedMNISTDataProvider(MNISTDataProvider):
     """Data provider for MNIST dataset which randomly transforms images."""
 
-    def __init__(self, which_set='train', batch_size=100, max_num_batches=-1,
-                 shuffle_order=True, rng=None, transformer=None):
+    def __init__(
+        self,
+        which_set="train",
+        batch_size=100,
+        max_num_batches=-1,
+        shuffle_order=True,
+        rng=None,
+        transformer=None,
+    ):
         """Create a new augmented MNIST data provider object.
 
         Args:
@@ -421,12 +491,12 @@ class AugmentedMNISTDataProvider(MNISTDataProvider):
                 the data provider.
         """
         super(AugmentedMNISTDataProvider, self).__init__(
-            which_set, batch_size, max_num_batches, shuffle_order, rng)
+            which_set, batch_size, max_num_batches, shuffle_order, rng
+        )
         self.transformer = transformer
 
     def next(self):
         """Returns next data batch or raises `StopIteration` if at end."""
-        inputs_batch, targets_batch = super(
-            AugmentedMNISTDataProvider, self).next()
+        inputs_batch, targets_batch = super(AugmentedMNISTDataProvider, self).next()
         transformed_inputs_batch = self.transformer(inputs_batch, self.rng)
         return transformed_inputs_batch, targets_batch

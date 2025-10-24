@@ -727,10 +727,7 @@ class DropoutLayer(StochasticLayer):
 
         if stochastic:
             if self.incl_prob < 1.0:
-                if self.share_across_batch:
-                    mask_shape = (1, inputs.shape[1])
-                else:
-                    mask_shape = inputs.shape
+                mask_shape = inputs.shape
 
                 random_values = self.rng.uniform(size=mask_shape)
                 self.mask = (random_values < self.incl_prob).astype(np.float32)
